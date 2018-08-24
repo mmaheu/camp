@@ -5,7 +5,6 @@ pipeline {
     environment {
       ORG               = 'mmaheu'
       APP_NAME          = 'camp'
-      CHARTMUSEUM_CREDS = credentials('jenkins-x-chartmuseum')
     }
     stages {
       stage('CI Build and push snapshot') {
@@ -24,15 +23,12 @@ pipeline {
             sh 'export VERSION=$PREVIEW_VERSION && skaffold build -f skaffold.yaml'
 
 
-            sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:$PREVIEW_VERSION"
             slackSend "started ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
           }
 
           dir ('./charts/preview') {
            container('maven') {
-             sh "make preview"
-             sh "jx preview --app $APP_NAME --dir ../.."
-           }
+                       }
           }
         }
       }
@@ -46,7 +42,6 @@ pipeline {
             sh "git checkout master"
             sh "git config --global credential.helper store"
 
-            sh "jx step git credentials"
             // so we can retrieve the version in later steps
             sh "echo \$(jx-release-version) > VERSION"
             sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
@@ -62,7 +57,6 @@ pipeline {
             sh 'export VERSION=`cat VERSION` && skaffold build -f skaffold.yaml'
 
 
-            sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
             slackSend "started ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
           }
         }
@@ -74,13 +68,10 @@ pipeline {
         steps {
           dir ('./charts/camp') {
             container('maven') {
-              sh 'jx step changelog --version v\$(cat ../../VERSION)'
-
+            
               // release the helm chart
-              sh 'jx step helm release'
-
+            
               // promote through all 'Auto' promotion Environments
-              sh 'jx promote -b --all-auto --timeout 1h --version \$(cat ../../VERSION)'
               slackSend "started ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
             }
           }
