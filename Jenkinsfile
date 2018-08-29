@@ -25,6 +25,7 @@ pipeline {
 
 
             sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:$PREVIEW_VERSION"
+            slackSend "started ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
           }
 
           dir ('./charts/preview') {
@@ -62,6 +63,7 @@ pipeline {
 
 
             sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
+            slackSend "started ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
           }
         }
       }
@@ -79,6 +81,7 @@ pipeline {
 
               // promote through all 'Auto' promotion Environments
               sh 'jx promote -b --all-auto --timeout 1h --version \$(cat ../../VERSION)'
+              slackSend "started ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
             }
           }
         }
