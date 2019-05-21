@@ -22,8 +22,6 @@ pipeline {
             sh "mvn install"
             sh 'export VERSION=$PREVIEW_VERSION && skaffold build -f skaffold.yaml'
 
-
-            slackSend "started ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
           }
 
           dir ('./charts/preview') {
@@ -55,9 +53,6 @@ pipeline {
             sh 'mvn clean deploy'
 
             sh 'export VERSION=`cat VERSION` && skaffold build -f skaffold.yaml'
-
-
-            slackSend "started ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
           }
         }
       }
@@ -72,7 +67,7 @@ pipeline {
               // release the helm chart
             
               // promote through all 'Auto' promotion Environments
-              slackSend "started ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+
             }
           }
         }
